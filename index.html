@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuis Ekologi Industri – Pertemuan 2</title>
+<style>
+:root{--navy:#14305c;--navy2:#1f4a8a;--bg:#f2f5fa;--ok:#1b8a4b;--bad:#c0392b;--ink:#1c2433}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:var(--navy);color:#fff;padding:18px 16px;text-align:center}
+header h1{margin:0;font-size:1.3rem}header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+main{max-width:780px;margin:18px auto;padding:0 14px}
+.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px #0001;margin-bottom:16px}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input{width:100%;padding:10px;border:1px solid #b9c4d6;border-radius:6px;font-size:1rem}
+button{background:var(--navy2);color:#fff;border:0;border-radius:6px;padding:10px 20px;font-size:1rem;cursor:pointer}
+button:hover{background:var(--navy)}button:disabled{background:#9aa7bd;cursor:not-allowed}
+button.sec{background:#e3e9f3;color:var(--navy)}
+.bar{height:8px;background:#dde4f0;border-radius:4px;overflow:hidden;margin:8px 0 14px}
+.bar div{height:100%;background:var(--navy2);width:0;transition:width .3s}
+.opt{display:block;width:100%;text-align:left;background:#fff;color:var(--ink);border:2px solid #cfd8e8;margin:8px 0;padding:11px 14px}
+.opt:hover{background:#eef3fb}.opt.sel{border-color:var(--navy2);background:#e4edfb}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+.hide{display:none}
+.score{text-align:center}.score .n{font-size:3rem;font-weight:700;color:var(--navy2)}
+.ident{display:grid;grid-template-columns:110px 1fr;gap:2px 8px;font-size:.95rem}
+.rev{border-left:5px solid var(--bad)}.rev.ok{border-left-color:var(--ok)}
+.rev p{margin:4px 0}.tag{font-weight:700}.ok .tag{color:var(--ok)}.rev:not(.ok) .tag{color:var(--bad)}
+.exp{background:#f3f6fb;padding:8px 12px;border-radius:6px;margin-top:6px;font-size:.93rem}
+.note{font-size:.85rem;color:#58637a}
+@media print{header{background:#fff!important;color:#000;border-bottom:2px solid #000}.noprint{display:none!important}
+body{background:#fff}.card{box-shadow:none;border:1px solid #bbb;break-inside:avoid}main{max-width:none}}
+</style>
+</head>
+<body>
+<header><h1>Kuis Ekologi Industri</h1><p>Pertemuan 2 – Memahami Industri Sebagai Sistem Kehidupan · Program Studi Teknik Industri</p></header>
+<main>
+<section id="login" class="card">
+  <h2>Identitas Mahasiswa</h2>
+  <label for="nama">Nama Lengkap</label><input id="nama" autocomplete="name">
+  <label for="nim">NIM</label><input id="nim" inputmode="numeric">
+  <label for="prodi">Program Studi</label><input id="prodi" list="pl" value="Teknik Industri">
+  <datalist id="pl"><option>Teknik Industri</option><option>Teknik Komputer</option><option>Sistem Informasi</option><option>Teknik Informatika</option></datalist>
+  <p class="note">30 soal pilihan ganda. Kuis hanya dapat dikerjakan satu kali per NIM. Pembahasan ditampilkan setelah kuis selesai.</p>
+  <button id="start">Mulai Kuis</button>
+  <p id="err" class="note" style="color:var(--bad)"></p>
+</section>
+
+<section id="quiz" class="card hide">
+  <div style="display:flex;justify-content:space-between"><strong id="cnt"></strong><span id="who" class="note"></span></div>
+  <div class="bar"><div id="pb"></div></div>
+  <h3 id="q"></h3><div id="opts"></div>
+  <div class="nav"><button class="sec" id="prev">← Sebelumnya</button><button id="next">Selanjutnya →</button></div>
+</section>
+
+<section id="result" class="hide">
+  <div class="card score">
+    <h2>Hasil Kuis Ekologi Industri</h2>
+    <div class="ident" style="text-align:left;max-width:420px;margin:0 auto 12px">
+      <b>Nama</b><span id="rn"></span><b>NIM</b><span id="rm"></span><b>Prodi</b><span id="rp"></span><b>Waktu</b><span id="rt"></span>
+    </div>
+    <div class="n" id="rs"></div><p id="rd"></p>
+    <button class="noprint" onclick="window.print()">💾 Simpan ke PDF</button>
+    <p class="note noprint">Pada jendela cetak, pilih tujuan “Simpan sebagai PDF”.</p>
+  </div>
+  <div id="review"></div>
+</section>
+</main>
+
+<script>
+const Q=[
+["Ketika sebuah pabrik menghasilkan 10.000 produk per hari, apa yang keluar dari pabrik tersebut?",["Hanya produk jadi","Produk, serta limbah, emisi, panas, dan kebisingan","Hanya limbah dan emisi","Hanya energi yang terbuang"],1,"Industri adalah sistem terbuka: selain produk, ada output tak diinginkan berupa limbah, emisi, panas, dan kebisingan."],
+["Manakah yang BUKAN termasuk input sistem industri menurut materi?",["Bahan baku","Air","Kebisingan","Informasi"],2,"Input: bahan baku, air, energi, tenaga kerja, informasi. Kebisingan adalah output tak diinginkan."],
+["Istilah ekologi pertama kali diusulkan oleh …",["Charles Darwin pada 1859","Ernst Haeckel pada 1869","Alfred Wegener pada 1912","Eugene Odum pada 1953"],1,"Ernst Haeckel mengusulkan istilah ekologi pada 1869."],
+["Ekologi didefinisikan sebagai ilmu yang mempelajari …",["Struktur mesin industri","Hubungan timbal balik antara organisme hidup dengan lingkungannya","Cara memaksimalkan produksi","Pengolahan limbah cair"],1,"Definisi klasik ekologi: hubungan timbal balik antara organisme dengan lingkungannya."],
+["Pada slide “Mendefinisikan Ulang Ekologi”, ekologi dirumuskan sebagai …",["Dinamika Sistem + Interaksi Jaringan","Input + Output","Produksi + Konsumsi","Biotik + Abiotik"],0,"Ekologi = [Dinamika Sistem] + [Interaksi Jaringan]; cara pandang yang cocok diterapkan pada industri."],
+["Urutan dampak yang benar: pabrik menggunakan air → … → masyarakat.",["Masuk ke sungai → menghasilkan limbah → organisme air → masyarakat","Menghasilkan limbah → masuk ke sungai → mempengaruhi organisme air → mempengaruhi masyarakat","Organisme air → limbah → sungai → masyarakat","Menghasilkan limbah → organisme air → sungai → masyarakat"],1,"Rantai: pabrik pakai air → hasilkan limbah → masuk sungai → pengaruhi organisme air → pengaruhi masyarakat."],
+["Sebuah perusahaan meningkatkan produksi tetapi limbahnya 2x lipat. Apakah sistemnya benar-benar semakin efisien?",["Ya, karena produksi naik","Ya, karena keuntungan pasti naik","Belum tentu; peningkatan output disertai pemborosan dan beban lingkungan","Tidak ada hubungannya dengan efisiensi"],2,"Efisiensi harus dilihat sistemik: output naik tetapi limbah berlipat berarti banyak sumber daya terbuang."],
+["Urutan skala organisasi kehidupan dari yang terkecil adalah …",["Individu – Populasi – Komunitas – Ekosistem – Biosfer","Individu – Komunitas – Populasi – Ekosistem – Biosfer","Populasi – Individu – Komunitas – Biosfer – Ekosistem","Biosfer – Ekosistem – Komunitas – Populasi – Individu"],0,"Skala: individu → populasi → komunitas → ekosistem → biosfer."],
+["Biosfer mencakup tiga lapisan berikut, yaitu …",["Litosfer, hidrosfer, atmosfer","Litosfer, stratosfer, magnetosfer","Hidrosfer, ionosfer, atmosfer","Biosfer, ekosfer, atmosfer"],0,"Biosfer terdiri atas litosfer (daratan), hidrosfer (air), dan atmosfer (udara)."],
+["Pada tingkat organisasi kehidupan mana fokus Teknik Industri beroperasi?",["Individu","Populasi","Ekosistem","Biosfer saja"],2,"Teknik Industri bekerja pada tingkat ekosistem, tempat sistem buatan manusia berinteraksi langsung dengan lingkungan abiotik dan biotik."],
+["Ekosistem terdiri atas …",["Komunitas biotik + lingkungan abiotik","Hewan + tumbuhan","Pabrik + lingkungan","Populasi + individu"],0,"Ekosistem = komunitas biotik + lingkungan abiotik."],
+["Manakah yang termasuk komponen biotik?",["Tanah dan mineral","Bakteri dan jamur","Cahaya dan temperatur","Air dan udara"],1,"Biotik: manusia, hewan, tumbuhan, bakteri, jamur. Lainnya adalah abiotik."],
+["Manakah daftar komponen abiotik yang benar?",["Hewan, tumbuhan, air","Air & udara, tanah & mineral, cahaya & temperatur, kelembaban","Manusia, bakteri, kelembaban","Jamur, cahaya, tumbuhan"],1,"Abiotik adalah lingkungan fisik dan kimia: air & udara, tanah & mineral, cahaya & temperatur, kelembaban."],
+["Ciri sistem alami (hutan/danau) dibandingkan sistem buatan adalah …",["Heterogenitas rendah","Memerlukan energi dan perawatan eksternal","Mampu mempertahankan proses kehidupan secara mandiri","Menghasilkan limbah yang tidak terserap"],2,"Sistem alami heterogen, mampu mempertahankan diri secara mandiri, dan bersiklus tertutup."],
+["Manakah ciri sistem buatan (kawasan industri)?",["Siklus tertutup sempurna","Relatif kurang heterogen dan memerlukan energi serta perawatan eksternal","Selalu mandiri","Limbah selalu menjadi makanan organisme lain"],1,"Sistem buatan relatif kurang heterogen, butuh energi/perawatan eksternal, dan limbahnya tidak selalu dapat diserap sistem."],
+["Makna “siklus tertutup” pada sistem alami adalah …",["Tidak ada energi masuk","Limbah satu organisme menjadi makanan organisme lain","Semua organisme sejenis","Produk dijual ke luar sistem"],1,"Pada siklus tertutup, limbah satu organisme dimanfaatkan organisme lain sehingga tidak ada yang terbuang."],
+["Pada model dasar industri sebagai sistem, output yang berupa nilai tambah bagi masyarakat adalah …",["Limbah","Emisi","Panas","Produk"],3,"Produk = nilai tambah ke masyarakat; limbah, emisi, dan panas = beban lingkungan."],
+["Tantangan utama Industrial Engineering pada model industri sebagai sistem adalah …",["Menambah jumlah input sebanyak mungkin","Mengurangi aliran limbah tanpa mengurangi fungsi utama sistem produksi","Menghentikan produksi","Memindahkan limbah ke wilayah lain"],1,"Tantangan IE: menekan aliran limbah tanpa mengorbankan fungsi utama produksi."],
+["Pada analogi akuarium, jumlah ikan naik 100% sementara oksigen tetap. Hasilnya …",["Sistem makin efisien","Keseimbangan runtuh","Oksigen bertambah sendiri","Tidak ada perubahan"],1,"Kapasitas pendukung (oksigen) tetap, sehingga peningkatan populasi menyebabkan keseimbangan runtuh."],
+["Urutan efek berantai pada studi kasus industri: produksi +20% → … ",["Limbah naik → kebutuhan material naik → beban pengolahan naik","Kebutuhan material & energi naik → volume limbah & emisi naik → beban kapasitas pengolahan lingkungan naik","Beban pengolahan naik → limbah naik → produksi naik","Emisi naik → produksi turun → energi naik"],1,"Produksi naik meningkatkan input, lalu limbah/emisi, lalu beban kapasitas pengolahan lingkungan."],
+["Pernyataan “perubahan pada satu bagian sistem akan memengaruhi keseimbangan bagian lainnya” merupakan inti dari …",["Lean manufacturing","System Thinking","Quality Control","Time Study"],1,"Itulah System Thinking: melihat keterkaitan antar bagian sistem."],
+["Mengapa batas sistem industri dikatakan jauh lebih besar dari sekadar pagar pabrik?",["Karena pabrik berukuran sangat besar","Karena dampak meluas dari kawasan, kota, wilayah, nasional hingga global","Karena aturan pemerintah","Karena pagar pabrik tidak jelas"],1,"Dampak lingkungan merambat dari pabrik ke kawasan, kota, wilayah, nasional, hingga global (perubahan iklim/biosfer)."],
+["Menurut redefinisi pencemaran, pencemaran adalah …",["Takdir dari kegiatan industri","Hilangnya sumber daya berharga akibat kelemahan desain proses","Akibat keberadaan masyarakat","Hanya masalah hukum"],1,"Pencemaran dipandang sebagai kebocoran (leakage), yaitu inefisiensi sistem akibat kelemahan desain proses."],
+["Pasangan sumber dan bentuk “kebocoran” yang BENAR adalah …",["Proses pembakaran → kebisingan","Mesin/gesekan → emisi","Proses mekanis → kebisingan","Proses produksi → panas terbuang"],2,"Produksi → limbah; pembakaran → emisi; mesin/gesekan → panas terbuang; proses mekanis → kebisingan."],
+["Urutan rantai pencemaran yang benar adalah …",["Sumber pencemar → limbah masuk lingkungan → perubahan kualitas → ekosistem terganggu → manusia terdampak","Manusia terdampak → ekosistem terganggu → sumber pencemar","Perubahan kualitas → sumber pencemar → limbah masuk lingkungan","Ekosistem terganggu → limbah masuk lingkungan → sumber pencemar"],0,"Pencemar → limbah masuk lingkungan → kualitas berubah → ekosistem terganggu → manusia terdampak."],
+["Pada reverse-supply-chain ekologis, urutan dari pasar hingga dampak adalah …",["Permintaan produk → permintaan bahan baku → eksploitasi sumber daya → perubahan lingkungan → dampak ekologis","Dampak ekologis → deforestasi → ekstraksi → pabrik → pasar","Eksploitasi → permintaan produk → deforestasi → pabrik","Permintaan bahan baku → pasar → dampak → ekstraksi"],0,"Permintaan pasar mendorong kebutuhan bahan baku, ekstraksi, deforestasi, lalu banjir, longsor, erosi, pemanasan global."],
+["Urutan tahapan manajemen lingkungan sebagai continuous improvement adalah …",["Identifikasi – Pengukuran – Analisis – Perbaikan – Pengendalian – Monitoring – Evaluasi","Analisis – Identifikasi – Perbaikan – Evaluasi – Monitoring","Monitoring – Pengukuran – Identifikasi – Evaluasi","Perbaikan – Identifikasi – Analisis – Pengendalian"],0,"Tujuh langkah: 1 Identifikasi, 2 Pengukuran, 3 Analisis, 4 Perbaikan, 5 Pengendalian, 6 Monitoring, 7 Evaluasi, lalu berulang."],
+["Pada paradigma efisiensi baru, setelah improvement kondisinya menjadi …",["Input tinggi, waste tinggi, energi boros","Input efisien, waste berkurang, energi optimal → dampak lingkungan berkurang & profitabilitas jangka panjang","Input rendah tetapi biaya tersembunyi tinggi","Waste tetap, energi naik"],1,"Perbaikan menghasilkan input efisien, waste berkurang, energi optimal, sehingga dampak lingkungan turun dan profitabilitas jangka panjang meningkat."],
+["Pesan inti: “Environmental improvement JUGA merupakan bentuk …”",["Beban biaya tambahan","Process improvement","Kewajiban hukum semata","Strategi pemasaran"],1,"Perbaikan lingkungan sejalan dengan perbaikan proses: mengurangi pemborosan input, waste, dan energi."],
+["Pada sintesis, sumber daya (air, energi, material) bagi sistem industri sebaiknya dipahami sebagai …",["Milik perusahaan sepenuhnya","Dipinjam dari ekosistem, sehingga bebannya perlu dikelola agar ekosistem tetap mampu menyediakannya kembali","Tak terbatas","Tidak berkaitan dengan ekosistem"],1,"Setiap proses industri adalah subsistem ekosistem global; sumber daya dipinjam dan beban limbah harus dikelola."]
+];
+const $=id=>document.getElementById(id);
+let ans=Array(Q.length).fill(-1),cur=0,me={};
+const key=n=>"kuis_ekoind_p2_"+n;
+function load(n){try{return JSON.parse(localStorage.getItem(key(n)))}catch(e){return null}}
+function save(n,d){try{localStorage.setItem(key(n),JSON.stringify(d))}catch(e){}}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+$("start").onclick=()=>{
+  const nama=$("nama").value.trim(),nim=$("nim").value.trim(),prodi=$("prodi").value.trim();
+  if(!nama||!nim||!prodi){$("err").textContent="Nama, NIM, dan Prodi wajib diisi.";return}
+  const d=load(nim);
+  if(d){me=d.me;ans=d.ans;showResult(true);return}
+  me={nama,nim,prodi};
+  $("login").classList.add("hide");$("quiz").classList.remove("hide");
+  $("who").textContent=nama+" · "+nim;render();
+};
+function render(){
+  const q=Q[cur];
+  $("cnt").textContent="Soal "+(cur+1)+" / "+Q.length;
+  $("pb").style.width=((cur+1)/Q.length*100)+"%";
+  $("q").textContent=(cur+1)+". "+q[0];
+  $("opts").innerHTML=q[1].map((o,i)=>`<button class="opt ${ans[cur]===i?"sel":""}" data-i="${i}"><b>${"ABCD"[i]}.</b> ${esc(o)}</button>`).join("");
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ans[cur]=+b.dataset.i;render()});
+  $("prev").disabled=cur===0;
+  $("next").textContent=cur===Q.length-1?"Selesai ✔":"Selanjutnya →";
+}
+$("prev").onclick=()=>{if(cur>0){cur--;render()}};
+$("next").onclick=()=>{
+  if(cur<Q.length-1){cur++;render();return}
+  const un=ans.filter(a=>a<0).length;
+  if(un&&!confirm(un+" soal belum dijawab. Tetap selesaikan kuis?"))return;
+  me.time=new Date().toLocaleString("id-ID");
+  save(me.nim,{me,ans});showResult(false);
+};
+function showResult(again){
+  $("login").classList.add("hide");$("quiz").classList.add("hide");$("result").classList.remove("hide");
+  const benar=Q.filter((q,i)=>ans[i]===q[2]).length,skor=Math.round(benar/Q.length*1000)/10;
+  $("rn").textContent=me.nama;$("rm").textContent=me.nim;$("rp").textContent=me.prodi;$("rt").textContent=me.time||"-";
+  $("rs").textContent=skor;
+  $("rd").textContent="Benar "+benar+" dari "+Q.length+" soal · Salah/kosong "+(Q.length-benar)+(again?" (hasil percobaan sebelumnya)":"");
+  $("review").innerHTML="<h3>Pembahasan</h3>"+Q.map((q,i)=>{
+    const ok=ans[i]===q[2],u=ans[i]<0?"Tidak dijawab":"ABCD"[ans[i]]+". "+q[1][ans[i]];
+    return `<div class="card rev ${ok?"ok":""}"><p><b>${i+1}. ${esc(q[0])}</b></p>
+    <p class="tag">${ok?"✔ Benar":"✘ Salah"}</p><p>Jawaban Anda: ${esc(u)}</p>
+    <p>Jawaban benar: <b>${"ABCD"[q[2]]}. ${esc(q[1][q[2]])}</b></p><div class="exp"><b>Pembahasan:</b> ${esc(q[3])}</div></div>`}).join("");
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
